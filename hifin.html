@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HiFin Mods</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin:0;
+    font-family:Poppins, sans-serif;
+    background: linear-gradient(135deg,#e3f2fd,#ffffff);
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(135deg,#1e88e5,#42a5f5);
+    color:white;
+    padding:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.header-top {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo {
+    cursor:pointer;
+    font-weight:bold;
+    font-size:18px;
+    transition:0.3s;
+}
+.logo:hover {
+    transform:scale(1.05);
+}
+
+/* SEARCH */
+.search {
+    padding:8px 15px;
+    border-radius:20px;
+    border:none;
+    outline:none;
+    transition:0.3s;
+}
+.search:focus {
+    box-shadow:0 0 10px rgba(255,255,255,0.7);
+}
+
+/* CATEGORY */
+.categories {
+    display:flex;
+    gap:10px;
+    padding:10px;
+    overflow-x:auto;
+}
+
+.cat {
+    padding:6px 14px;
+    border-radius:20px;
+    border:1px solid #1e88e5;
+    cursor:pointer;
+    transition:0.3s;
+}
+.cat:hover {
+    background:#e3f2fd;
+}
+
+.cat.active {
+    background:#1e88e5;
+    color:white;
+    box-shadow:0 2px 8px rgba(30,136,229,0.4);
+}
+
+/* GRID */
+.mods {
+    padding:15px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+/* CARD */
+.card {
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    transition:0.3s;
+}
+.card:hover {
+    transform:translateY(-5px) scale(1.02);
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+.card img {
+    width:100%;
+    height:120px;
+    object-fit:cover;
+    transition:0.3s;
+}
+.card:hover img {
+    transform:scale(1.05);
+}
+
+.card-content {
+    padding:10px;
+}
+
+/* BADGE */
+.badge {
+    font-size:10px;
+    background:linear-gradient(135deg,#ff5252,#ff1744);
+    color:white;
+    padding:4px 6px;
+    border-radius:5px;
+}
+
+/* BUTTON */
+button {
+    padding:10px;
+    border:none;
+    background:linear-gradient(135deg,#1e88e5,#42a5f5);
+    color:white;
+    cursor:pointer;
+    border-radius:8px;
+    transition:0.3s;
+}
+button:hover {
+    transform:scale(1.05);
+    box-shadow:0 5px 15px rgba(30,136,229,0.4);
+}
+
+.download-btn {
+    width:100%;
+    margin-top:5px;
+}
+
+/* PANEL */
+.panel {
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(5px);
+    animation:fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+}
+
+.box {
+    background:white;
+    padding:20px;
+    max-width:400px;
+    margin:80px auto;
+    border-radius:15px;
+    animation:slideUp 0.3s;
+}
+
+@keyframes slideUp {
+    from {
+        transform:translateY(30px);
+        opacity:0;
+    }
+    to {
+        transform:translateY(0);
+        opacity:1;
+    }
+}
+
+/* INPUT */
+input, textarea, select {
+    width:100%;
+    margin-bottom:10px;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    outline:none;
+    transition:0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color:#1e88e5;
+    box-shadow:0 0 5px rgba(30,136,229,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="header-top">
+        <div class="logo" onclick="openPin()">HiFin Mods</div>
+        <input class="search" id="search" placeholder="Cari mod...">
+    </div>
+</div>
+
+<div class="categories">
+    <div class="cat active" data-cat="ALL">ALL</div>
+    <div class="cat" data-cat="APK">APK</div>
+    <div class="cat" data-cat="GAME">GAME</div>
+    <div class="cat" data-cat="SCRIPT">SCRIPT</div>
+    <div class="cat" data-cat="DLL">DLL</div>
+</div>
+
+<div class="mods" id="modsList"></div>
+
+<!-- PIN PANEL -->
+<div class="panel" id="pinPanel">
+<div class="box">
+<h3>Masukkan PIN</h3>
+<input type="password" id="pinInput">
+<button onclick="checkPin()">Masuk</button>
+</div>
+</div>
+
+<!-- MENU PANEL -->
+<div class="panel" id="menuPanel">
+<div class="box">
+<h3>Menu Developer</h3>
+<button onclick="openUpload()">Upload Mod</button>
+<button onclick="openEdit()">Edit Mod</button>
+</div>
+</div>
+
+<!-- UPLOAD -->
+<div class="panel" id="uploadPanel">
+<div class="box">
+<h3>Upload Mod</h3>
+
+<input id="title" placeholder="Judul">
+<textarea id="desc"></textarea>
+
+<select id="category">
+<option>APK</option>
+<option>GAME</option>
+<option>SCRIPT</option>
+<option>DLL</option>
+</select>
+
+<input id="link" placeholder="Link Download">
+<input type="file" id="image">
+
+<button onclick="saveMod()">Simpan</button>
+</div>
+</div>
+
+<!-- EDIT PANEL -->
+<div class="panel" id="editPanel">
+<div class="box">
+<h3>Edit Mod</h3>
+<div id="editList"></div>
+</div>
+</div>
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+// CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyBoGzExHCZvLNnLHggB2sbst0t4l-tc3Mk",
+  authDomain: "mods-31307.firebaseapp.com",
+  projectId: "mods-31307",
+  storageBucket: "mods-31307.firebasestorage.app",
+  messagingSenderId: "913890186204",
+  appId: "1:913890186204:web:4a652535f0fba62bda7519"
+};
+
+// INIT
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let mods = [];
+let currentCategory = "ALL";
+let editIndex = null;
+
+/* PIN */
+function openPin(){ pinPanel.style.display="block"; }
+function checkPin(){
+    if(pinInput.value==="1"){
+        pinPanel.style.display="none";
+        menuPanel.style.display="block";
+    } else {
+        alert("PIN salah!");
+    }
+}
+
+/* MENU */
+function openUpload(){
+    menuPanel.style.display="none";
+    uploadPanel.style.display="block";
+}
+function openEdit(){
+    menuPanel.style.display="none";
+    editPanel.style.display="block";
+}
+
+/* SAVE KE FIREBASE */
+async function saveMod(){
+    const file = image.files[0];
+    if(!file) return alert("Pilih gambar!");
+
+    // Menambahkan loading sederhana agar user tahu proses sedang berjalan
+    const btn = document.querySelector("button[onclick='saveMod()']");
+    btn.innerText = "Sedang Mengupload...";
+    btn.disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const res = await fetch("https://api.imgbb.com/1/upload?key=75b94064750b4a3974e1e5f4fb780a08", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+        
+        // PERBAIKAN: Gunakan data.data.url untuk direct link
+        const imageUrl = data.data.url; 
+
+        await db.collection("mods").add({
+            title: title.value,
+            desc: desc.value,
+            category: category.value,
+            link: link.value,
+            image: imageUrl,
+            createdAt: new Date() // Tambahkan timestamp agar bisa diurutkan
+        });
+
+        alert("Mod berhasil diupload!");
+        uploadPanel.style.display="none";
+        loadMods();
+    } catch (error) {
+        console.error(error);
+        alert("Gagal upload!");
+    } finally {
+        btn.innerText = "Simpan";
+        btn.disabled = false;
+    }
+}
+
+
+/* LOAD DATA DARI FIREBASE */
+async function loadMods(){
+    const snapshot = await db.collection("mods").get();
+
+    mods = [];
+    snapshot.forEach(doc=>{
+        mods.push(doc.data());
+    });
+
+    applyFilter();
+}
+
+/* CARD */
+function createCard(mod){
+    const d=document.createElement("div");
+    d.className="card";
+    // Menambahkan onerror agar jika gambar rusak, tidak kosong melompong
+    d.innerHTML=`
+    <img src="${mod.image}" onerror="this.src='https://via.placeholder.com/300x120?text=No+Image'">
+    <div class="card-content">
+        <span class="badge">${mod.category}</span>
+        <h4 style="margin:5px 0">${mod.title}</h4>
+        <p style="font-size:12px; color:#666">${mod.desc}</p>
+        <button class="download-btn" onclick="window.open('${mod.link}')">Download</button>
+    </div>`;
+    return d;
+}
+
+
+/* FILTER */
+function applyFilter(){
+    let f=mods;
+
+    if(currentCategory!=="ALL"){
+        f=f.filter(m=>m.category===currentCategory);
+    }
+
+    const k=search.value.toLowerCase();
+    f=f.filter(m=>m.title.toLowerCase().includes(k)||m.desc.toLowerCase().includes(k));
+
+    renderMods(f);
+}
+
+function renderMods(data){
+    modsList.innerHTML="";
+    data.forEach(m=>modsList.appendChild(createCard(m)));
+}
+
+/* EVENTS */
+search.oninput=applyFilter;
+
+document.querySelectorAll(".cat").forEach(el=>{
+    el.onclick=()=>{
+        currentCategory=el.dataset.cat;
+        document.querySelectorAll(".cat").forEach(c=>c.classList.remove("active"));
+        el.classList.add("active");
+        applyFilter();
+    }
+});
+
+/* INIT LOAD */
+loadMods();
+</script>
+
+</body>
+</html>
